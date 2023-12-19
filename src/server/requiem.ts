@@ -1,9 +1,59 @@
-import { Players } from "./services/players.service";
+import reflection from "shared/controllers/reflection";
 
 export namespace Requiem {
+    let paths = new Map<string, Instance>()
+
     export let services : object & Services;
-    
     export let resolve: <T> () => T
+
+    export let events = new class {
+        private map = new Map<string, BindableEvent>()
+
+        public get(id : string) {
+            if(!this.map.has(id)) {
+                this.register(id)
+            }
+
+            return this.map.get(id)
+        }
+
+        register(id : string) {
+            if(this.map.has(id)) {
+                return this.map.get(id) as BindableEvent
+            }
+
+            const event = new Instance("BindableEvent")
+            this.map.set(id, event)
+
+            return event
+        }
+    }
+
+    export let path = (path : Instance) => {
+        paths.set(path.GetFullName(), path)
+    }
+
+    const startModulesWithTag = () => {
+        reflection.getClassesWithMetaTag("start").forEach((classObject) => {
+            const constructor = classObject as unknown as {new(...args : unknown[]) : {}}
+            const object = new constructor()
+
+            const objectWithStart = object as unknown as {start: (this: typeof classObject) => {}}
+            objectWithStart.start()
+        })
+    }
+
+    export let ignite = () => {
+        paths.forEach((value, key) => {
+            value.GetDescendants().forEach((descendant) => {
+                if(descendant.IsA("ModuleScript")) {
+                    require(descendant)
+                }
+            })
+        })
+        
+        startModulesWithTag()
+    }
 }
 
 Requiem.services = setmetatable({}, {

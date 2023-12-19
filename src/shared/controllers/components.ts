@@ -1,8 +1,50 @@
 import Maid from "@rbxts/maid";
 import Object from "@rbxts/object-utils";
+import reflection from "./reflection";
 
 export interface Start {
     start(): void
+}
+
+export function ResolveClassDependencies<T extends object>(object : T) {
+    const constructor = object as T & {dependencies: Record<string, unknown>}
+    const services = reflection.getClassesWithMetaTag("service")
+
+    if(constructor.dependencies) {
+        Object.entries(constructor.dependencies).forEach(([key, value]) => {
+            services.forEach((service) => {
+                const name = reflection.getClassMetaTag(service, "name")
+                if(name === key) {
+                    const constructorAsRecord = constructor as unknown as Record<string, unknown>
+                    constructorAsRecord[key] = service
+                }
+            })
+        })
+    }
+}
+
+export function ResolveClassListeners<C extends object>(object : C, instance : Instance) {
+    const classWithConstructor = object as unknown as {
+        constructor : (newObject : C, ...args : unknown[]) => void
+    }
+    
+    const oldConstructor = classWithConstructor.constructor
+
+    classWithConstructor.constructor = (newObject : C, ...args : unknown[]) => {
+        const constructorWithListeners = newObject as C & { listeners: Record<string, (...args : unknown[]) => void> }
+        if (constructorWithListeners.listeners) {
+            Object.entries(constructorWithListeners.listeners).forEach(([key, value]) => {
+                const connection = (instance as unknown as Record<string, RBXScriptSignal>)[key]
+                connection.Connect((...args : unknown[]) => {
+                    constructorWithListeners.listeners[key](newObject, ...args)
+                })
+            })
+        }
+
+        oldConstructor(newObject, ...args)
+    }
+
+    return classWithConstructor
 }
 
 export function EventHandler(target: object, propertyKey: string, descriptor: TypedPropertyDescriptor<() => void>) {
@@ -15,7 +57,6 @@ export function EventHandler(target: object, propertyKey: string, descriptor: Ty
     return descriptor
 }
 
-
 export function Service(object : Instance | void) {
     // You can add logic here for the decorator
     return <C extends new (...args: any[]) => {}>(constructor: C) => {
@@ -23,33 +64,44 @@ export function Service(object : Instance | void) {
             instance = object
         } as C
 
-        const classWithConstructor = extendedClass as unknown as {constructor : (newObject : C, ...args : unknown[]) => void}
-        const oldConstructor = classWithConstructor.constructor
-
-        classWithConstructor.constructor = (newObject : C, ...args : unknown[]) => {
-            const constructorWithListeners = newObject as C & { listeners: Record<string, (...args : unknown[]) => void> }
-            if (constructorWithListeners.listeners) {
-                Object.entries(constructorWithListeners.listeners).forEach(([key, value]) => {
-                    const connection = (object as unknown as Record<string, RBXScriptSignal>)[key]
-                    connection.Connect((...args : unknown[]) => {
-                        constructorWithListeners.listeners[key](newObject, ...args)
-                    })
-                })
-            }
-
-            oldConstructor(newObject, ...args)
+        const classWithConstructor = extendedClass as unknown as {
+            constructor : (newObject : C, ...args : unknown[]) => void
+            start? : () => void
         }
+        
+        ResolveClassListeners(classWithConstructor, object as Instance)
 
+        reflection.addMetaTagToClass(classWithConstructor, "service", true)
+        reflection.addMetaTagToClass(classWithConstructor, "name", string.lower(tostring(constructor)))
+
+        if(classWithConstructor.start) reflection.addMetaTagToClass(classWithConstructor, "start", classWithConstructor.start)
         return classWithConstructor as unknown as C
     };
 }
 
-export function EntityComponent<T extends object>(parent : Instance | void) {
+export function EntityComponent<T extends object>(event : BindableEvent | undefined) {
     // You can add logic here for the decorator
     return <C extends new (...args: any[]) => {}>(constructor: C) => {
-        return class extends constructor {
-            instance = {} as T
+        const extendedClass = class extends constructor {
+            instance = {} as T;
+            initialize?(this: object): void
         }
+
+        event?.Event.Connect((...args : unknown[]) => {
+            const passedInstance = args[0] as Instance
+            ResolveClassListeners(extendedClass, passedInstance)
+            
+            const newClass = new extendedClass(passedInstance)
+            newClass.instance = passedInstance as unknown as T
+
+            ResolveClassDependencies(newClass)
+
+            if(newClass.initialize !== undefined) {
+                newClass.initialize()
+            }
+        })
+
+        return extendedClass
     };
 }
 

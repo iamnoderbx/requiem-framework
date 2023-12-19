@@ -28,7 +28,7 @@ interface PlayerListeners {
  */
 
 // We specifically wish to listen for this entity under a parent of Players
-@EntityComponent(Requiem.services.Players)
+@EntityComponent(Requiem.events.get('OnPlayerAdded'))
 export class PlayerComponent extends BaseEntityComponent<Player> 
     implements Listeners<PlayerListeners> {
     
