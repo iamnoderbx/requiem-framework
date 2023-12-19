@@ -51,10 +51,10 @@ export namespace Requiem {
 
     const startModulesWithTag = () => {
         reflection.getClassesWithMetaTag("start").forEach((classObject) => {
-            const constructor = classObject as unknown as {new(...args : unknown[]) : {}}
-            const object = new constructor()
+            //const constructor = classObject as unknown as {new(...args : unknown[]) : {}}
+            //const object = new constructor()
 
-            const objectWithStart = object as unknown as {start: (this: typeof classObject) => {}}
+            const objectWithStart = classObject as unknown as {start: (this: typeof classObject) => {}}
             objectWithStart.start()
         })
     }

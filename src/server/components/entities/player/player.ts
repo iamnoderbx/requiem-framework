@@ -44,9 +44,6 @@ export class PlayerComponent extends BaseEntityComponent<Player>
      */
     constructor() {
         super()
-
-        // Debug ensuring this is working!
-        print("Created a new player entity component")
     }
     
     /**

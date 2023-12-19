@@ -2,6 +2,14 @@ import { PlayerComponent } from "server/components/entities/player/player";
 import { Requiem } from "server/requiem";
 import { BaseService, EventHandler, Listeners, Service, Start } from "shared/controllers/components";
 
+/**
+ * The PlayerServiceListeners interface defines the methods that should be implemented 
+ * by any class that wants to listen to player-related events in the PlayerService.
+ * 
+ * 
+ * @interface PlayerServiceListeners
+ * @author NodeSupport
+ */
 interface PlayerServiceListeners {
     PlayerAdded(player : Player): void
 }

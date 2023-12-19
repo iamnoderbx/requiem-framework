@@ -69,13 +69,19 @@ export function Service(object : Instance | void) {
             start? : () => void
         }
         
+        const oldConstructor = classWithConstructor.constructor
+        classWithConstructor.constructor = (newObject : C & {start? : () => void}, ...args : unknown[]) => {
+            reflection.addMetaTagToClass(newObject, "service", true)
+            reflection.addMetaTagToClass(newObject, "name", string.lower(tostring(constructor)))
+
+            if(newObject.start) reflection.addMetaTagToClass(newObject, "start", newObject.start)
+            oldConstructor(newObject, ...args)
+        }
+
         ResolveClassListeners(classWithConstructor, object as Instance)
-
-        reflection.addMetaTagToClass(classWithConstructor, "service", true)
-        reflection.addMetaTagToClass(classWithConstructor, "name", string.lower(tostring(constructor)))
-
-        if(classWithConstructor.start) reflection.addMetaTagToClass(classWithConstructor, "start", classWithConstructor.start)
-        return classWithConstructor as unknown as C
+        
+        const service = new extendedClass()
+        return service as unknown as C
     };
 }
 
@@ -115,7 +121,7 @@ export class BaseComponent<T = object> {
     }
 
     getEvents() {
-        print(this)
+        
     }
 }
 
