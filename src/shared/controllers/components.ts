@@ -6,6 +6,10 @@ export interface Start {
     start(): void
 }
 
+export interface Initialize {
+    initialize(): void
+}
+
 export function ResolveClassDependencies<T extends object>(object : T) {
     const constructor = object as T & {dependencies: Record<string, unknown>}
     const services = reflection.getClassesWithMetaTag("service")
@@ -31,17 +35,23 @@ export function ResolveClassListeners<C extends object>(object : C, instance : I
     const oldConstructor = classWithConstructor.constructor
 
     classWithConstructor.constructor = (newObject : C, ...args : unknown[]) => {
-        const constructorWithListeners = newObject as C & { listeners: Record<string, (...args : unknown[]) => void> }
+        const connections : RBXScriptConnection[] = []
+
+        const constructorWithListeners = newObject as C & { maid?: Maid, listeners: Record<string, (...args : unknown[]) => void> }
         if (constructorWithListeners.listeners) {
             Object.entries(constructorWithListeners.listeners).forEach(([key, value]) => {
                 const connection = (instance as unknown as Record<string, RBXScriptSignal>)[key]
-                connection.Connect((...args : unknown[]) => {
+                connections.push(connection.Connect((...args : unknown[]) => {
                     constructorWithListeners.listeners[key](newObject, ...args)
-                })
+                }))
             })
         }
 
         oldConstructor(newObject, ...args)
+
+        if(constructorWithListeners.maid) connections.forEach((connection) => {
+            constructorWithListeners.maid?.GiveTask(connection)
+        })
     }
 
     return classWithConstructor
@@ -66,14 +76,16 @@ export function Service(object : Instance | void) {
 
         const classWithConstructor = extendedClass as unknown as {
             constructor : (newObject : C, ...args : unknown[]) => void
-            start? : () => void
+            start? : () => void,
+            initialize? : () => void
         }
         
         const oldConstructor = classWithConstructor.constructor
-        classWithConstructor.constructor = (newObject : C & {start? : () => void}, ...args : unknown[]) => {
+        classWithConstructor.constructor = (newObject : C & {start? : () => void, initialize?: () => void}, ...args : unknown[]) => {
             reflection.addMetaTagToClass(newObject, "service", true)
             reflection.addMetaTagToClass(newObject, "name", string.lower(tostring(constructor)))
 
+            if(newObject.initialize) reflection.addMetaTagToClass(newObject, "initialize", newObject.start)
             if(newObject.start) reflection.addMetaTagToClass(newObject, "start", newObject.start)
             oldConstructor(newObject, ...args)
         }
@@ -83,6 +95,10 @@ export function Service(object : Instance | void) {
         const service = new extendedClass()
         return service as unknown as C
     };
+}
+
+export function Controller(object : Instance | void) {
+    return Service(object)
 }
 
 export function EntityComponent<T extends object>(event : BindableEvent | undefined) {
@@ -125,9 +141,8 @@ export class BaseComponent<T = object> {
     }
 }
 
-export class BaseService extends BaseComponent {
-
-}
+export class BaseService extends BaseComponent {}
+export class BaseController extends BaseComponent {}
 
 export class BaseEntityComponent<T> extends BaseComponent<T> {
     protected maid = new Maid()

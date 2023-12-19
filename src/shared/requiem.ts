@@ -1,10 +1,14 @@
 import reflection from "shared/controllers/reflection";
+import { Parallel } from "./parallel";
 
 export namespace Requiem {
     let paths = new Map<string, Instance>()
 
     export let services : object & Services;
     export let resolve: <T> () => T
+
+    export let folder : requiem = game.GetService("ReplicatedStorage").WaitForChild("requiem") as requiem
+    export let Threading = Parallel
 
     export let events = new class {
         private map = new Map<string, BindableEvent>()
@@ -49,11 +53,15 @@ export namespace Requiem {
         paths.set(path.GetFullName(), path)
     }
 
+    const initializeModulesWithTag = () => {
+        reflection.getClassesWithMetaTag("initialize").forEach((classObject) => {
+            const objectWithInitialize = classObject as unknown as {initialize: (this: typeof classObject) => {}}
+            objectWithInitialize.initialize()
+        })
+    }
+
     const startModulesWithTag = () => {
         reflection.getClassesWithMetaTag("start").forEach((classObject) => {
-            //const constructor = classObject as unknown as {new(...args : unknown[]) : {}}
-            //const object = new constructor()
-
             const objectWithStart = classObject as unknown as {start: (this: typeof classObject) => {}}
             objectWithStart.start()
         })
@@ -68,6 +76,7 @@ export namespace Requiem {
             })
         })
         
+        initializeModulesWithTag()
         startModulesWithTag()
     }
 }

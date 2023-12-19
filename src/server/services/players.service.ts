@@ -1,5 +1,5 @@
 import { PlayerComponent } from "server/components/entities/player/player";
-import { Requiem } from "server/requiem";
+import { Requiem } from "shared/requiem";
 import { BaseService, EventHandler, Listeners, Service, Start } from "shared/controllers/components";
 
 /**

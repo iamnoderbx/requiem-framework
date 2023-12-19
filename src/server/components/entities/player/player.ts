@@ -1,4 +1,4 @@
-import { Requiem } from "server/requiem";
+import { Requiem } from "shared/requiem";
 import { Players } from "server/services/players.service";
 import { EntityComponent, BaseEntityComponent, Listeners, EventHandler } from "shared/controllers/components";
 import { Dependency } from "shared/controllers/dependencies";
@@ -12,9 +12,8 @@ import { Dependency } from "shared/controllers/dependencies";
  * @interface PlayerListeners
  * @author NodeSupport
  */
-
 interface PlayerListeners {
-    CharacterAdded(): void
+    CharacterAdded(): void  // CharacterAdded Event
 }
 
 /**
@@ -27,11 +26,14 @@ interface PlayerListeners {
  * @author NodeSupport
  */
 
-// We specifically wish to listen for this entity under a parent of Players
+// We specifically wish to listen for the internal player added event
+// so we can create a component for the player. Note the first parameter passed
+// from the event is our instance object we are attaching to.
 @EntityComponent(Requiem.events.get('OnPlayerAdded'))
 export class PlayerComponent extends BaseEntityComponent<Player> 
     implements Listeners<PlayerListeners> {
     
+    // Inject our dependency for the player controller
     @Dependency
     private players!: Players
 
@@ -54,7 +56,7 @@ export class PlayerComponent extends BaseEntityComponent<Player>
      * @author NodeSupport
      */
     public initialize() {
-        print("A new player component has been initalized!")
+        print("A new player component has been initalized!", this.instance.Name)
     }
 
     /**

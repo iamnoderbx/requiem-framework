@@ -25,6 +25,9 @@
 			},
 			"TS": {
 				"$path": "out/shared"
+			},
+			"requiem": {
+				"$path": "assets/requiem.rbxm"
 			}
 		},
 		"StarterPlayer": {
