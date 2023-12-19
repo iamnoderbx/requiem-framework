@@ -1,3 +1,5 @@
 import { Requiem } from "./requiem";
+import { Players } from "./services/players.service";
 
-Requiem.players.get()
+const test = new Players()
+test.start()

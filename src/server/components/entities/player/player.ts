@@ -1,4 +1,5 @@
 import { Requiem } from "server/requiem";
+import { Players } from "server/services/players.service";
 import { EntityComponent, BaseEntityComponent, Listeners, EventHandler } from "shared/controllers/components";
 import { Dependency } from "shared/controllers/dependencies";
 
@@ -32,7 +33,7 @@ export class PlayerComponent extends BaseEntityComponent<Player>
     implements Listeners<PlayerListeners> {
     
     @Dependency
-    private players!: typeof Requiem.players
+    private players!: Players
 
     /**
      * Constructor for the Player class. Automatically created as well
@@ -43,6 +44,9 @@ export class PlayerComponent extends BaseEntityComponent<Player>
      */
     constructor() {
         super()
+
+        // Debug ensuring this is working!
+        print("Created a new player entity component")
     }
     
     /**

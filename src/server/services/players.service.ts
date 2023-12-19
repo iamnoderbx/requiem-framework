@@ -1,16 +1,19 @@
-import { Service } from "shared/controllers/components";
+import { Requiem } from "server/requiem";
+import { BaseService, EventHandler, Listeners, Service, Start } from "shared/controllers/components";
 
-interface Start {
-    start(): void
+interface ServiceListeners {
+    PlayerAdded(player : Player): void
 }
 
-@Service()
-export class Players implements Start {
-    public get() {
-        
-    }
+@Service(Requiem.services.Players)
+export class Players extends BaseService 
+    implements Start, Listeners<ServiceListeners> {
 
-    public start() {
-        
+    public start() {}
+    public get() { }
+
+    @EventHandler
+    public onPlayerAdded(player : Player) {
+        print(player)
     }
 }
