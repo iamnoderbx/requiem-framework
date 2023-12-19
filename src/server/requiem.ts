@@ -28,6 +28,22 @@ export namespace Requiem {
             return event
         }
     }
+    
+    export let components = new class {
+        added<T>(instance : Instance) {
+            return new Promise<T>((resolve) => {
+                const event = reflection.onComponentEvent
+                if(!event) return error("Event 'OnComponentAdded' does not exist!")
+
+                const connection = event.Event.Connect((passedInstance : Instance, component : T) => {
+                    if(passedInstance === instance) {
+                        connection.Disconnect()
+                        resolve(component)
+                    }
+                })
+            })
+        }
+    }
 
     export let path = (path : Instance) => {
         paths.set(path.GetFullName(), path)

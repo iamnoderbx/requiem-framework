@@ -1,5 +1,10 @@
 export default new class {
     private classes = new Map<object, Record<string, unknown>>()
+    public onComponentEvent = new Instance("BindableEvent")
+
+    public onComponentAdded<T>(instance : Instance, newClass : object) {
+        this.onComponentEvent.Fire(instance, newClass)
+    }
 
     public addMetaTagToClass(constructor : object, key : string, value : unknown) {
         if(!this.classes.has(constructor)) {

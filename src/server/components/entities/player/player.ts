@@ -51,13 +51,13 @@ export class PlayerComponent extends BaseEntityComponent<Player>
     
     /**
      * The 'initialize' method of the PlayerComponent class.
-     * It prints the result of calling the 'get' method of the 'players' property.
+     * This code will execute prior to pushing any promises outside of this class.
      * 
      * @method initialize
      * @author NodeSupport
      */
     public initialize() {
-        print(this.players.get())
+        print("A new player component has been initalized!")
     }
 
     /**

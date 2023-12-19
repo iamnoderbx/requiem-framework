@@ -1,3 +1,4 @@
+import { PlayerComponent } from "server/components/entities/player/player";
 import { Requiem } from "server/requiem";
 import { BaseService, EventHandler, Listeners, Service, Start } from "shared/controllers/components";
 
@@ -9,6 +10,9 @@ interface PlayerServiceListeners {
 export class Players extends BaseService 
     implements Start, Listeners<PlayerServiceListeners> {
     
+    // A map of every player to retrieve from.
+    private players = new Map<Player, PlayerComponent>()
+    
     // Create a new event in which can be hooked to via components.
     public event = Requiem.events.register('OnPlayerAdded')
 
@@ -17,7 +21,22 @@ export class Players extends BaseService
     }
 
     public start() {}
-    public get() { }
+
+    /**
+     * The 'get' method of the PlayersService class.
+     * It retrieves the player's component from the players map.
+     * 
+     * Example usage: 
+     * const player = service.get(player);
+     * 
+     * @method get
+     * @param {Player} player - The player whose component is to be retrieved.
+     * @returns {PlayerComponent} The component of the player.
+     * @author NodeSupport
+     */
+    public get(player : Player) {
+        return this.players.get(player)
+    }
 
     /**
      * The 'onPlayerAdded' method of the PlayersService class.
@@ -35,5 +54,11 @@ export class Players extends BaseService
         // Fire the event with the player as the argument, this will then
         // create all component entities correlating to the player.
         this.event.Fire(player)
+
+        // Whenever a new component is added with the player instance binded
+        // to it, resolve this promise.
+        Requiem.components.added<PlayerComponent>(player).then((component) => {
+            this.players.set(player, component)
+        })
     }
 }

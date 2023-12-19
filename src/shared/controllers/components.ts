@@ -94,6 +94,7 @@ export function EntityComponent<T extends object>(event : BindableEvent | undefi
             const newClass = new extendedClass(passedInstance)
             newClass.instance = passedInstance as unknown as T
 
+            reflection.onComponentAdded<T>(passedInstance, newClass)
             ResolveClassDependencies(newClass)
 
             if(newClass.initialize !== undefined) {
