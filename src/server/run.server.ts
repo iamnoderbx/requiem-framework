@@ -1,3 +1,3 @@
-import { Walls } from "./walls";
+import { Requiem } from "./requiem";
 
-Walls.players.get()
+Requiem.players.get()

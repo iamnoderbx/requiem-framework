@@ -1,4 +1,4 @@
-import { Walls } from "server/walls";
+import { Requiem } from "server/requiem";
 import { EntityComponent, BaseEntityComponent, Listeners, EventHandler } from "shared/controllers/components";
 import { Dependency } from "shared/controllers/dependencies";
 
@@ -27,12 +27,12 @@ interface PlayerListeners {
  */
 
 // We specifically wish to listen for this entity under a parent of Players
-@EntityComponent(Walls.services.Players)
+@EntityComponent(Requiem.services.Players)
 export class PlayerComponent extends BaseEntityComponent<Player> 
     implements Listeners<PlayerListeners> {
     
     @Dependency
-    private players!: typeof Walls.players
+    private players!: typeof Requiem.players
 
     /**
      * Constructor for the Player class. Automatically created as well
