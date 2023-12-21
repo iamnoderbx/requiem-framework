@@ -1,5 +1,8 @@
 //!native
 import { BaseDataComponent } from "shared/controllers/components";
+import { Parallel } from "shared/parallel";
+import { Requiem } from "shared/requiem";
+import VisibleFaceTask from "../threads/faces.thread";
 
 export class Occludable<T> extends BaseDataComponent<T & {instance: Instance}> {
     // The world location of the occluder
@@ -16,6 +19,9 @@ export class Occludable<T> extends BaseDataComponent<T & {instance: Instance}> {
     // A list of corner positions, we cache these values while checking if
     // the occlude is on the screen
     protected cornerPositions : Map<CFrame, Vector3> = new Map();
+
+    private getVisibleFaceThread : Parallel = new Requiem.Threading()
+        .setExecutionTask(VisibleFaceTask).setMaximumCores(10);
 
     public drawGeometry() {
         const isOccluderModel = this.data.instance.IsA("Model")
@@ -96,6 +102,11 @@ export class Occludable<T> extends BaseDataComponent<T & {instance: Instance}> {
     protected getVisibleFaceBounding(useCenterForCorners : boolean = false) {
         if(!this.faces) return error("The occludable does not have faces.")
         
+        // const [ boundingBox, visibleFaces ] = this.getVisibleFaceThread.queue(this.faces, useCenterForCorners) as [
+        //     { min: Vector2; max: Vector2 },
+        //     { corners: CFrame[]; normal: Vector3; edges: CFrame[][]; center: Vector3}[]
+        // ]
+
         const camera = game.Workspace.CurrentCamera as Camera
 
         const screenPoints : Vector2[] = []

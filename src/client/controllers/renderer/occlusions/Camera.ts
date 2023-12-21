@@ -106,11 +106,11 @@ export class Cells {
         const cameraDistance = this.camera.CFrame.Position.sub(this.previousCameraLocation.Position).Magnitude
         if(cameraDistance < 1) return
 
-        this.occluders.forEach((occluder) => {
+        this.occluders.forEach((occluder) => task.spawn(() => {
             const pointsOnScreen = occluder.countPointsOnScreen()
             if(!pointsOnScreen) return
 
-            const isOccluderOnScreen = occluder.isOnScreen() && pointsOnScreen > 3
+            const isOccluderOnScreen = occluder.isOnScreen() && pointsOnScreen > 5
             const wasOccluderOnScreen = RenderedOccluders.get(occluder)
 
             // If the occluder was on the screen and is no longer on the screen
@@ -128,9 +128,9 @@ export class Cells {
             // Update the occluders state
             RenderedOccluders.set(occluder, isOccluderOnScreen)
             if(isOccluderOnScreen) occluder.updated(this.cells, this.screenSize)
-        });
+        }));
 
-        this.occludees.forEach((occludee) => {
+        this.occludees.forEach((occludee) => task.spawn(() => {
             const isOccludeeOnScreen = occludee.isOnScreen()
             const wasOccludeeOnScreen = RenderedOccludees.get(occludee)
 
@@ -149,7 +149,7 @@ export class Cells {
             // Update the occludees state
             RenderedOccludees.set(occludee, isOccludeeOnScreen)
             if(isOccludeeOnScreen) occludee.updated()
-        })
+        }))
 
         // Update the previous camera location
         this.previousCameraLocation = this.camera.CFrame

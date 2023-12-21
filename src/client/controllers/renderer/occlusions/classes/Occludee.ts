@@ -46,7 +46,7 @@ export class Occludee extends Occludable<OccludeeType> implements Initialize {
         if(!this.faces) return error("The occludee does not have faces.")
 
         const [ boundingBox, visibleFaces ] = this.getVisibleFaceBounding()
-        if(!boundingBox || visibleFaces.size() === 0) return
+        if(!boundingBox || !visibleFaces || visibleFaces.size() === 0) return
 
         this.bounds = boundingBox
 

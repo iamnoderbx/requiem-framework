@@ -28,11 +28,6 @@ export class Occluder extends Occludable<OccluderType> implements Initialize {
 
     private occludees : Occludee[] = []
 
-    // @ DEPRECATED
-    // A thread pool for occlusion rendering, this is used to render the occlusion
-    private onScreenThread : Parallel = new Requiem.Threading()
-        .setExecutionTask(OnScreenTask).setMaximumCores(8)
-
     // Occluder constructor, called prior to the initalization phase.
     constructor() {
         super()

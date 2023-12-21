@@ -88,6 +88,24 @@ export class Parallel {
         return this
     }
 
+    queue<T>(...args : unknown[]) {
+        this.indexQueue++;
+
+        if(this.indexQueue > this.pool.size() - 1) {
+            this.indexQueue = 1;
+        };
+
+        const actor = this.pool[this.indexQueue] as unknown as {
+            SendMessage: (this: {}, arg0: string, ...arg3: unknown[]) => void, 
+            Event : BindableEvent
+        }
+
+        actor.SendMessage("ignite", ...args)
+
+        const response = actor.Event.Event.Wait() as T
+        return response
+    }
+
     execute<T>(...args : unknown[]) {
         const res : Array<defined> = [];
         const goal_size = this.pool.size();
