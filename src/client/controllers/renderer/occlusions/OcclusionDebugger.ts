@@ -1,5 +1,7 @@
 import { Requiem } from "shared/requiem"
 
+const IS_DEBUGGING_ENABLED = false;
+
 export class OcclusionDebugger {
     private interface : ScreenGui | undefined
 
@@ -8,6 +10,8 @@ export class OcclusionDebugger {
     private lines : Map<Frame, boolean> = new Map()
 
     render() {
+        if(!IS_DEBUGGING_ENABLED) return
+
         const gui = new Instance("ScreenGui")
         gui.Name = "OcclusionDebugger"
         gui.Parent = Requiem.services.Players.LocalPlayer!.WaitForChild("PlayerGui") as PlayerGui
@@ -23,6 +27,8 @@ export class OcclusionDebugger {
     }
 
     drawDebugLine(startScreen : Vector2, finishScreen : Vector2, color : Color3 = new Color3(0, 1, 0)) {
+        if(!IS_DEBUGGING_ENABLED) return
+
         const line = this.getFreeDebugLine()
         if(!line) return
 
@@ -40,6 +46,8 @@ export class OcclusionDebugger {
     }
 
     drawDebugSquare(boundings: {min: Vector2, max: Vector2}, color : Color3 = new Color3(1, 0, 0)) {
+        if(!IS_DEBUGGING_ENABLED) return
+
         // Create a square using debug lines
         const min = boundings.min
         const max = boundings.max
@@ -58,6 +66,7 @@ export class OcclusionDebugger {
     }
 
     drawDebugSquare3D(faces: {corners: CFrame[]; normal: Vector3; edges: CFrame[][]; center: Vector3}[], color : Color3 = new Color3(0, 1, 0)) {
+        if(!IS_DEBUGGING_ENABLED) return
         const camera = game.Workspace.CurrentCamera as Camera
 
         faces.forEach((face) => {
@@ -75,6 +84,7 @@ export class OcclusionDebugger {
     }
 
     getFreeDebugLine() {
+        if(!IS_DEBUGGING_ENABLED) return
         for(const [line, used] of pairs(this.lines)) {
             if(!used) {
                 this.lines.set(line, true)
@@ -84,6 +94,7 @@ export class OcclusionDebugger {
     }
 
     freeDebugLines() {
+        if(!IS_DEBUGGING_ENABLED) return
         this.lines.forEach((used, line) => {
             this.lines.set(line, false)
 
@@ -93,6 +104,7 @@ export class OcclusionDebugger {
     }
 
     allocateDebugLines(count : number) {
+        if(!IS_DEBUGGING_ENABLED) return
         for(let i = 0; i < count; i++) {
             const line = new Instance("Frame")
             line.Size = new UDim2(0, 0, 0, 0)
@@ -109,6 +121,7 @@ export class OcclusionDebugger {
     }
 
     clear() {
+        if(!IS_DEBUGGING_ENABLED) return
         const holder = this.interface?.FindFirstChild("Frame")
         holder?.GetChildren().forEach((child) => {
             child.Destroy()
@@ -116,6 +129,7 @@ export class OcclusionDebugger {
     }
 
     addPoint(position : Vector2) {
+        if(!IS_DEBUGGING_ENABLED) return
         const point = new Instance("Frame")
         point.Size = new UDim2(0, 10, 0, 10)
         point.Position = new UDim2(0, position.X, 0, position.Y)
@@ -124,6 +138,7 @@ export class OcclusionDebugger {
     }
 
     addWorldPoint(position : Vector3) {
+        if(!IS_DEBUGGING_ENABLED) return
         const part = new Instance("Part")
         part.Size = new Vector3(2, 2, 2)
         part.Position = position

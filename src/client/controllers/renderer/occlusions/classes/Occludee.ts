@@ -26,16 +26,16 @@ export class Occludee extends Occludable<OccludeeType> implements Initialize {
     }
 
     public initialize(): void {
-        // // Use our debugger in the work environment, may recode this later
-        // // to have some sort of toggle, but not necessary at the moment.
-        // this.debugger.render()
+        // Use our debugger in the work environment, may recode this later
+        // to have some sort of toggle, but not necessary at the moment.
+        this.debugger.render()
 
-        // // Allocate 24 lines for the occludee, this is the maximum amount of that should be able
-        // // to be drawn for a single occludee, one line for each edge.
-        // this.debugger.allocateDebugLines(24)
+        // Allocate 24 lines for the occludee, this is the maximum amount of that should be able
+        // to be drawn for a single occludee, one line for each edge.
+        this.debugger.allocateDebugLines(24)
 
-        // // Allocate 4 lines for the occludee to draw a debug square if needed.
-        // this.debugger.allocateDebugLines(4)
+        // Allocate 4 lines for the occludee to draw a debug square if needed.
+        this.debugger.allocateDebugLines(4)
 
         // Draw all of our geometry and store it in a cache.
         this.drawGeometry()
@@ -48,13 +48,31 @@ export class Occludee extends Occludable<OccludeeType> implements Initialize {
         const [ boundingBox, visibleFaces ] = this.getVisibleFaceBounding()
         if(!boundingBox || !visibleFaces || visibleFaces.size() === 0) return
 
-        this.bounds = boundingBox
+        // Add padding to the bounds
+        const padding = 1.25
+
+        // Calculate the width and height of the bounding box
+        const width = boundingBox.max.X - boundingBox.min.X;
+        const height = boundingBox.max.Y - boundingBox.min.Y;
+
+        // Calculate the amount to expand the bounding box by
+        const expandX = (width * padding - width) / 2;
+        const expandY = (height * padding - height) / 2;
+
+        // Create a new bounding box with the expanded dimensions
+        const expandedBoundingBox = {
+            min: new Vector2(boundingBox.min.X - expandX, boundingBox.min.Y - expandY),
+            max: new Vector2(boundingBox.max.X + expandX, boundingBox.max.Y + expandY)
+        };
+
+        // Update the bounds
+        this.bounds = expandedBoundingBox;
 
         // Free the debugging lines
-        //this.debugger.freeDebugLines()
+        this.debugger.freeDebugLines()
 
         // Draw debuggers
-        //this.debugger.drawDebugSquare(boundingBox, Color3.fromRGB(0, 0, 255))
+        this.debugger.drawDebugSquare(this.bounds, Color3.fromRGB(0, 0, 255))
     }
 
     public updateOcclusionState(isObjectOccluded : boolean) {

@@ -99,6 +99,76 @@ export class Occludable<T> extends BaseDataComponent<T & {instance: Instance}> {
         return false;
     }
 
+    protected getCornersOfBoundingBox(box : { min: Vector2;  max: Vector2 }) {
+        // Create a square using debug lines
+        const min = box.min
+        const max = box.max
+
+        // Create the corners of the square
+        const topLeft = new Vector2(min.X, min.Y);
+        const topRight = new Vector2(max.X, min.Y);
+        const bottomLeft = new Vector2(min.X, max.Y);
+        const bottomRight = new Vector2(max.X, max.Y);
+
+        return $tuple(topLeft, topRight, bottomLeft, bottomRight)
+    }
+
+    protected getClampedBoundingBox() {
+        if(!this.faces) return error("The occludable does not have faces.")
+
+        const camera = game.Workspace.CurrentCamera as Camera
+        const screenPoints : Vector2[] = []
+
+        const maxBoundsX = camera.ViewportSize.X;
+        const maxBoundsY = camera.ViewportSize.Y;
+
+        const screenHypotenuse = math.sqrt((maxBoundsX / 2) ^ 2 + (maxBoundsY / 2) ^ 2);
+
+        // Get the faces that the camera can visibly see or are looking at by using
+        // the face normals. During this filter, we also get all corners of the occluder, it's
+        // more efficient to do this here than to do it later.
+        const visibleFaces = this.faces.filter(face => {
+            const dotProduct = face.normal.Dot(camera.CFrame.RightVector)
+
+            face.corners.forEach((corner) => {
+                const position = corner.Position
+                const [ screenPosition3d, onScreen ] = camera.WorldToScreenPoint(position)
+                
+                const depth = screenPosition3d.Z
+                if(depth < 0) return false
+
+                let xPosition = math.clamp(screenPosition3d.X, 0, maxBoundsX)
+                let yPosition = math.clamp(screenPosition3d.Y, 0, maxBoundsY)
+
+                if (!onScreen) {
+                    xPosition = math.clamp(xPosition, 0, maxBoundsX)
+                    yPosition = math.clamp(yPosition, 0, maxBoundsY)
+                }
+    
+                screenPoints.push(new Vector2(xPosition, yPosition))
+            }) 
+
+            if(dotProduct < 0.1) return false
+            return true
+        });
+
+        if(screenPoints.size() === 0) return $tuple(undefined, undefined)
+
+        // Calculate the minimum and maximum x and y coordinates to create the bounding box
+        const minX = math.min(...screenPoints.map(point => point.X));
+        const minY = math.min(...screenPoints.map(point => point.Y));
+        const maxX = math.max(...screenPoints.map(point => point.X));
+        const maxY = math.max(...screenPoints.map(point => point.Y));
+        
+        // Create the bounding box
+        const boundingBox = {
+            min: new Vector2(minX, minY),
+            max: new Vector2(maxX, maxY)
+        };
+
+        return $tuple(boundingBox, visibleFaces)
+    }
+
     protected getVisibleFaceBounding(useCenterForCorners : boolean = false) {
         if(!this.faces) return error("The occludable does not have faces.")
         
@@ -108,7 +178,6 @@ export class Occludable<T> extends BaseDataComponent<T & {instance: Instance}> {
         // ]
 
         const camera = game.Workspace.CurrentCamera as Camera
-
         const screenPoints : Vector2[] = []
 
         // Get the faces that the camera can visibly see or are looking at by using

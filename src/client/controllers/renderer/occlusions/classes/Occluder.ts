@@ -52,8 +52,48 @@ export class Occluder extends Occludable<OccluderType> implements Initialize {
         this.drawGeometry()
     }
 
+    public newUpdated(screenSize : Vector2) {
+        // Ensure our occluder has faces.
+        if(!this.faces) return error("The occluder does not have faces.")
 
-    public updated(cells : CameraCell[], screenSize : Vector2) {
+        const [ boundingBox, visibleFaces ] = this.getClampedBoundingBox()
+        if(!boundingBox || !visibleFaces || visibleFaces.size() === 0) return this.unrender()
+
+        RenderedOccludees.forEach((rendered, occludee) => {
+            // Bounds {min: Vector2, max: Vector2}
+            const bounds = occludee.bounds;
+    
+            // Create the corners of the bounds
+            const topLeft = new Vector2(bounds.min.X, bounds.min.Y);
+            const topRight = new Vector2(bounds.max.X, bounds.min.Y);
+            const bottomLeft = new Vector2(bounds.min.X, bounds.max.Y);
+            const bottomRight = new Vector2(bounds.max.X, bounds.max.Y);
+    
+            // Check if all corners are within the bounding box of the occluder
+            const corners = [topLeft, topRight, bottomLeft, bottomRight];
+            const allCornersInside = corners.every(corner =>
+                corner.X >= boundingBox.min.X && corner.X <= boundingBox.max.X &&
+                corner.Y >= boundingBox.min.Y && corner.Y <= boundingBox.max.Y
+            );
+    
+            // If not all corners are within the bounding box of the occluder, then
+            // make the occludee unrendered.
+            if(allCornersInside !== occludee.isObjectOccluded) {
+                occludee.updateOcclusionState(allCornersInside)
+
+                if(!allCornersInside && this.occludees.includes(occludee)) {
+                    this.occludees = this.occludees.filter(item => item !== occludee);
+                } else if(allCornersInside && !this.occludees.includes(occludee)) {
+                    this.occludees.push(occludee);
+                }
+            }
+        });
+
+        this.debugger.freeDebugLines()
+        this.debugger.drawDebugSquare(boundingBox)
+    }
+
+    public updated(screenSize : Vector2) {
         // Ensure our occluder has faces.
         if(!this.faces) return error("The occluder does not have faces.")
 

@@ -107,49 +107,29 @@ export class Cells {
         if(cameraDistance < 1) return
 
         this.occluders.forEach((occluder) => task.spawn(() => {
-            const pointsOnScreen = occluder.countPointsOnScreen()
-            if(!pointsOnScreen) return
-
-            const isOccluderOnScreen = occluder.isOnScreen()// && pointsOnScreen > 2
-            const wasOccluderOnScreen = RenderedOccluders.get(occluder)
-
-            // If the occluder was on the screen and is no longer on the screen
-            // then we need to unrender it.
-            if(wasOccluderOnScreen && !isOccluderOnScreen) {
-                occluder.unrender()
-            }
-
-            // If the occluder wasn't on the screen and is now on the screen
-            // then we need to render it.
-            if(!wasOccluderOnScreen && isOccluderOnScreen) {
-                occluder.render(this.cells)
-            }
-
-            // Update the occluders state
-            RenderedOccluders.set(occluder, isOccluderOnScreen)
-            if(isOccluderOnScreen) occluder.updated(this.cells, this.screenSize)
+            occluder.newUpdated(this.screenSize)
         }));
 
-        // this.occludees.forEach((occludee) => task.spawn(() => {
-        //     const isOccludeeOnScreen = occludee.isOnScreen()
-        //     const wasOccludeeOnScreen = RenderedOccludees.get(occludee)
+        this.occludees.forEach((occludee) => task.spawn(() => {
+            const isOccludeeOnScreen = occludee.isOnScreen()
+            const wasOccludeeOnScreen = RenderedOccludees.get(occludee)
 
-        //     // If the occludee was on the screen and is no longer on the screen
-        //     // then we need to unrender it.
-        //     if(wasOccludeeOnScreen && !isOccludeeOnScreen) {
-        //         occludee.unrender()
-        //     }
+            // If the occludee was on the screen and is no longer on the screen
+            // then we need to unrender it.
+            if(wasOccludeeOnScreen && !isOccludeeOnScreen) {
+                occludee.unrender()
+            }
 
-        //     // If the occludee wasn't on the screen and is now on the screen
-        //     // then we need to render it.
-        //     if(!wasOccludeeOnScreen && isOccludeeOnScreen) {
-        //         occludee.render()
-        //     }
+            // If the occludee wasn't on the screen and is now on the screen
+            // then we need to render it.
+            if(!wasOccludeeOnScreen && isOccludeeOnScreen) {
+                occludee.render()
+            }
 
-        //     // Update the occludees state
-        //     RenderedOccludees.set(occludee, isOccludeeOnScreen)
-        //     if(isOccludeeOnScreen) occludee.updated()
-        // }))
+            // Update the occludees state
+            RenderedOccludees.set(occludee, isOccludeeOnScreen)
+            if(isOccludeeOnScreen) occludee.updated()
+        }))
 
         // Update the previous camera location
         this.previousCameraLocation = this.camera.CFrame
