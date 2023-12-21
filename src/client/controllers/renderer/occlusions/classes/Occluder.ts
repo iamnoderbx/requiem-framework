@@ -1,3 +1,5 @@
+//!native
+
 import { BaseDataComponent, DataComponent, Initialize } from "shared/controllers/components"
 import { Requiem } from "shared/requiem"
 import { CameraCell } from "../Camera"
@@ -35,16 +37,16 @@ export class Occluder extends Occludable<OccluderType> implements Initialize {
 
     // An occluder has been added to the game.
     public initialize() {
-        // // Use our debugger in the work environment, may recode this later
-        // // to have some sort of toggle, but not necessary at the moment.
-        // this.debugger.render()
+        // Use our debugger in the work environment, may recode this later
+        // to have some sort of toggle, but not necessary at the moment.
+        this.debugger.render()
 
-        // // Allocate 24 lines for the occluder, this is the maximum amount of that should be able
-        // // to be drawn for a single occluder, one line for each edge.
-        // this.debugger.allocateDebugLines(24)
+        // Allocate 24 lines for the occluder, this is the maximum amount of that should be able
+        // to be drawn for a single occluder, one line for each edge.
+        this.debugger.allocateDebugLines(24)
 
-        // // Allocate 4 lines for the occluder to draw a debug square if needed.
-        // this.debugger.allocateDebugLines(4)
+        // Allocate 4 lines for the occluder to draw a debug square if needed.
+        this.debugger.allocateDebugLines(4)
 
         // Draw all of our geometry and store it in a cache.
         this.drawGeometry()
@@ -92,8 +94,8 @@ export class Occluder extends Occludable<OccluderType> implements Initialize {
             }
         });
 
-        // this.debugger.freeDebugLines()
-        // this.debugger.drawDebugSquare(boundingBox)
+        this.debugger.freeDebugLines()
+        this.debugger.drawDebugSquare(boundingBox)
         
         // this.debugger.drawDebugSquare3D(this.faces)
     }

@@ -91,7 +91,7 @@ export class Occludable<T> extends BaseDataComponent<T & {instance: Instance}> {
         for (let i = 0; i < corners.size(); i++) {
             const [ viewportPoint, isOnScreen ] = camera.WorldToViewportPoint(corners[i].Position);
             this.cornerPositions.set(corners[i], viewportPoint);
-
+            
             if(isOnScreen) return true;
         }
 
