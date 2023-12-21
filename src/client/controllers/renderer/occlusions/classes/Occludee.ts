@@ -1,3 +1,5 @@
+//!native
+
 import { DataComponent, BaseDataComponent, Initialize } from "shared/controllers/components";
 import { Requiem } from "shared/requiem";
 import { Occludable } from "./Occludable";
@@ -24,16 +26,16 @@ export class Occludee extends Occludable<OccludeeType> implements Initialize {
     }
 
     public initialize(): void {
-        // Use our debugger in the work environment, may recode this later
-        // to have some sort of toggle, but not necessary at the moment.
-        this.debugger.render()
+        // // Use our debugger in the work environment, may recode this later
+        // // to have some sort of toggle, but not necessary at the moment.
+        // this.debugger.render()
 
-        // Allocate 24 lines for the occludee, this is the maximum amount of that should be able
-        // to be drawn for a single occludee, one line for each edge.
-        this.debugger.allocateDebugLines(24)
+        // // Allocate 24 lines for the occludee, this is the maximum amount of that should be able
+        // // to be drawn for a single occludee, one line for each edge.
+        // this.debugger.allocateDebugLines(24)
 
-        // Allocate 4 lines for the occludee to draw a debug square if needed.
-        this.debugger.allocateDebugLines(4)
+        // // Allocate 4 lines for the occludee to draw a debug square if needed.
+        // this.debugger.allocateDebugLines(4)
 
         // Draw all of our geometry and store it in a cache.
         this.drawGeometry()
@@ -49,7 +51,7 @@ export class Occludee extends Occludable<OccludeeType> implements Initialize {
         this.bounds = boundingBox
 
         // Free the debugging lines
-        this.debugger.freeDebugLines()
+        //this.debugger.freeDebugLines()
 
         // Draw debuggers
         //this.debugger.drawDebugSquare(boundingBox, Color3.fromRGB(0, 0, 255))

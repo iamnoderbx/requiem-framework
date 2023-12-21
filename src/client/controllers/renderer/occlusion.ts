@@ -39,6 +39,12 @@ export class Occlusion {
     }
 
     private onOcclusionRender() {
+        // Benchmark
+        const start = tick()
+
         this.cameraChunks.update()
+
+        // Benchmark
+        print("Occlusion render took", tick() - start, "s")
     }
 }

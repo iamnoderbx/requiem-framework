@@ -40,28 +40,32 @@ export class Occluder extends Occludable<OccluderType> implements Initialize {
 
     // An occluder has been added to the game.
     public initialize() {
-        // Use our debugger in the work environment, may recode this later
-        // to have some sort of toggle, but not necessary at the moment.
-        this.debugger.render()
+        // // Use our debugger in the work environment, may recode this later
+        // // to have some sort of toggle, but not necessary at the moment.
+        // this.debugger.render()
 
-        // Allocate 24 lines for the occluder, this is the maximum amount of that should be able
-        // to be drawn for a single occluder, one line for each edge.
-        this.debugger.allocateDebugLines(24)
+        // // Allocate 24 lines for the occluder, this is the maximum amount of that should be able
+        // // to be drawn for a single occluder, one line for each edge.
+        // this.debugger.allocateDebugLines(24)
 
-        // Allocate 4 lines for the occluder to draw a debug square if needed.
-        this.debugger.allocateDebugLines(4)
+        // // Allocate 4 lines for the occluder to draw a debug square if needed.
+        // this.debugger.allocateDebugLines(4)
 
         // Draw all of our geometry and store it in a cache.
         this.drawGeometry()
     }
 
 
-    public updated(cells : CameraCell[]) {
+    public updated(cells : CameraCell[], screenSize : Vector2) {
         // Ensure our occluder has faces.
         if(!this.faces) return error("The occluder does not have faces.")
 
         const [ boundingBox, visibleFaces ] = this.getVisibleFaceBounding(true)
-        if(!boundingBox || visibleFaces.size() === 0) return
+        if(!boundingBox || visibleFaces.size() === 0) return this.unrender()
+
+        // Get the distance between min and max
+        const distance = boundingBox.max.sub(boundingBox.min).Magnitude / 2
+        if(distance > screenSize.X && distance > screenSize.Y) return this.unrender()
 
         RenderedOccludees.forEach((rendered, occludee) => {
             // Bounds {min: Vector2, max: Vector2}
@@ -101,11 +105,16 @@ export class Occluder extends Occludable<OccluderType> implements Initialize {
 
     // The occluder needs to be un-rendered from the screen.
     public unrender() {
-        //print("Un-render this occluder!")
+        if(!RenderedOccluders.get(this)) return
+        RenderedOccluders.set(this, false)
+
+        if(this.occludees.size() === 0) return
 
         this.occludees.forEach((occludee) => {
             occludee.updateOcclusionState(false)
         })
+
+        this.occludees = []
     }
 
     // The occluder needs to be rendered to the screen.

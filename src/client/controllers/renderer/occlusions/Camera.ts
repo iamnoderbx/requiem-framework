@@ -38,6 +38,7 @@ export class Cells {
     private raycastTask : Parallel
     
     private occlusionInstances : Instance[] = []
+    private screenSize : Vector2 = new Vector2()
 
     constructor() {
         // Get the current camera and assign it accordingly
@@ -83,6 +84,8 @@ export class Cells {
                 this.cells.push(cell)
             }
         }
+
+        this.screenSize = new Vector2(width, height)
     }
 
     private onViewportSizeChanged() {
@@ -101,10 +104,13 @@ export class Cells {
         // Time complexity is O(1), previously was O(n^2) due to the use of
         // a nested search
         const cameraDistance = this.camera.CFrame.Position.sub(this.previousCameraLocation.Position).Magnitude
-        if(cameraDistance < 0.05) return
+        if(cameraDistance < 1) return
 
         this.occluders.forEach((occluder) => {
-            const isOccluderOnScreen = occluder.isOnScreen()
+            const pointsOnScreen = occluder.countPointsOnScreen()
+            if(!pointsOnScreen) return
+
+            const isOccluderOnScreen = occluder.isOnScreen() && pointsOnScreen > 3
             const wasOccluderOnScreen = RenderedOccluders.get(occluder)
 
             // If the occluder was on the screen and is no longer on the screen
@@ -121,7 +127,7 @@ export class Cells {
 
             // Update the occluders state
             RenderedOccluders.set(occluder, isOccluderOnScreen)
-            if(isOccluderOnScreen) occluder.updated(this.cells)
+            if(isOccluderOnScreen) occluder.updated(this.cells, this.screenSize)
         });
 
         this.occludees.forEach((occludee) => {

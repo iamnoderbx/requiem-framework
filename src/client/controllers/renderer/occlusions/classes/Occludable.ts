@@ -1,3 +1,4 @@
+//!native
 import { BaseDataComponent } from "shared/controllers/components";
 
 export class Occludable<T> extends BaseDataComponent<T & {instance: Instance}> {
@@ -45,6 +46,23 @@ export class Occludable<T> extends BaseDataComponent<T & {instance: Instance}> {
         // Get the eight corners of the occluder.
         this.corners = this.getCorners()
         this.faces = this.getFaces()
+    }
+
+    public countPointsOnScreen() {
+        // Get the camera
+        const camera = game.Workspace.CurrentCamera as Camera
+        if(!this.corners) return
+
+        let count = 0;
+
+        for(let i = 0; i < this.corners.size(); i++) {
+            const corner = this.corners[i]
+
+            const [ viewportPoint, isOnScreen ] = camera.WorldToViewportPoint(corner.Position);
+            if(isOnScreen) count++;
+        }
+
+        return count;
     }
 
     public isOnScreen() {
