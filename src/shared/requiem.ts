@@ -34,12 +34,18 @@ export namespace Requiem {
     }
     
     export let components = new class {
-        added<T>(instance : Instance) {
+        added<T>(instance? : unknown) {
             return new Promise<T>((resolve) => {
                 const event = reflection.onComponentEvent
                 if(!event) return error("Event 'OnComponentAdded' does not exist!")
 
-                const connection = event.Event.Connect((passedInstance : Instance, component : T) => {
+                const connection = event.Connect((passedInstance : unknown, component : T) => {
+                    if(!instance) {
+                        connection.Disconnect()
+                        resolve(component)
+                        return
+                    }
+
                     if(passedInstance === instance) {
                         connection.Disconnect()
                         resolve(component)
@@ -47,6 +53,21 @@ export namespace Requiem {
                 })
             })
         }
+
+        // addedWithID<T>(tag : string) {
+        //     return new Promise<T>((resolve) => {
+        //         const event = reflection.onComponentEvent
+        //         if(!event) return error("Event 'OnComponentAdded' does not exist!")
+
+        //         event.Connect((instance : {id: string}, component : T) => {
+        //             if(!instance) return
+                    
+        //             if(instance.id === tag) {
+        //                 resolve(component)
+        //             }
+        //         })
+        //     })
+        // }
     }
 
     export let path = (path : Instance) => {

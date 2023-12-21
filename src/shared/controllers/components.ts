@@ -101,6 +101,33 @@ export function Controller(object : Instance | void) {
     return Service(object)
 }
 
+export function DataComponent<T extends object>(event : BindableEvent | undefined) {
+    return <C extends new (...args: any[]) => {}>(constructor: C) => {
+        const extendedClass = class extends constructor {
+            data = {} as T; 
+            initialize?(this: object): void
+        }
+
+        event?.Event.Connect((...args : unknown[]) => {
+            const passedInstance = args[0] as Instance
+            ResolveClassListeners(extendedClass, passedInstance)
+            
+            const newClass = new extendedClass(passedInstance)
+            newClass.data = passedInstance as unknown as T
+
+            ResolveClassDependencies(newClass)
+
+            if(newClass.initialize !== undefined) {
+                newClass.initialize()
+            }
+
+            reflection.onComponentAdded<T>(passedInstance, newClass)
+        })
+
+        return extendedClass
+    };
+}
+
 export function EntityComponent<T extends object>(event : BindableEvent | undefined) {
     // You can add logic here for the decorator
     return <C extends new (...args: any[]) => {}>(constructor: C) => {
@@ -128,23 +155,33 @@ export function EntityComponent<T extends object>(event : BindableEvent | undefi
     };
 }
 
-export class BaseComponent<T = object> {
+export class BaseComponent<T = object> {}
+
+export class BaseInstanceComponent<T = object> extends BaseComponent{
     // Class content here
     protected instance = {} as T
 
     getInstance() {
         return this.instance
     }
+}
 
-    getEvents() {
-        
+export class BaseObjectComponent<T = object> extends BaseComponent {
+    public data = {} as T
+
+    getData() {
+        return this.data
     }
 }
 
-export class BaseService extends BaseComponent {}
-export class BaseController extends BaseComponent {}
+export class BaseService extends BaseInstanceComponent {}
+export class BaseController extends BaseInstanceComponent {}
 
-export class BaseEntityComponent<T> extends BaseComponent<T> {
+export class BaseDataComponent<T> extends BaseObjectComponent<T> {
+    protected maid = new Maid()
+}
+
+export class BaseEntityComponent<T> extends BaseInstanceComponent<T> {
     protected maid = new Maid()
 }
 

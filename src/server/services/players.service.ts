@@ -27,8 +27,10 @@ export class Players extends BaseService
     constructor() {
         super()
     }
-
-    public start() {}
+    
+    public start() {
+        
+    }
 
     /**
      * The 'get' method of the PlayersService class.

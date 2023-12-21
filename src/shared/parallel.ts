@@ -88,14 +88,14 @@ export class Parallel {
         return this
     }
 
-    execute(...args : unknown[]) {
+    execute<T>(...args : unknown[]) {
         const res : Array<defined> = [];
         const goal_size = this.pool.size();
 
         let completed = 0;
         let step = 0;
 
-        let __resolve : (response : unknown) => void
+        let __resolve : (response : T) => void
 
         const invoke = () => {
             this.indexQueue++;
@@ -108,20 +108,21 @@ export class Parallel {
             const actor : Actor = this.folder.GetChildren()[this.indexQueue] as Actor
             actor.SendMessage("ignite", step, goal_size, ...args)
 
+            let storedStep = step;
             step ++;
 
             let event = actor.FindFirstChildWhichIsA("BindableEvent")
             const response = event?.Event.Wait()
-            if(response) res.push(response)
-            
+            if(response) res[storedStep] = response
+
             completed ++;
             
             if(completed === goal_size) {
-                return __resolve(res)
+                return __resolve(res as T)
             }
         }
 
-        return new Promise((resolve, reject) => {
+        return new Promise<T>((resolve, reject) => {
             __resolve = resolve
 
             for (let i = 0; i < goal_size; i++) {
