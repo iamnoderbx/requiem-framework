@@ -2,7 +2,7 @@ import DataTypeBuffer from "./DataTypeBuffer";
 
 const MAX_SIZE = 1073741824
 
-type DataTypes = CFrame | Vector3
+type DataTypes = CFrame | Vector3 | Vector2
 
 /**
  * The BufferWriter class.

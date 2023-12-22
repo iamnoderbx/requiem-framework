@@ -4,7 +4,7 @@
 import BufferWriter from "./BufferWriter";
 import DataTypeBuffer from "./DataTypeBuffer";
 
-type DataTypes = CFrame | Vector3
+type DataTypes = CFrame | Vector3 | Vector2
 
 export default class BufferReader {
     private buffer : buffer = buffer.create(0)

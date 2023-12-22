@@ -100,6 +100,10 @@ export namespace Requiem {
         initializeModulesWithTag()
         startModulesWithTag()
     }
+
+    export let getClient = () => {
+        return game.GetService("Players").LocalPlayer
+    }
 }
 
 Requiem.services = setmetatable({}, {

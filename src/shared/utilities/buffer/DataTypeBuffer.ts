@@ -11,6 +11,7 @@ const DataTypeBuffer = {
     DataTypesToString: {
         [CFrame as any]: "CFrame",
         [Vector3 as any]: "Vector3",
+        [Vector2 as any]: "Vector2",
     }
 }
 
@@ -50,5 +51,18 @@ DataTypeBuffer.ReadWrite.Vector3 = {
     }
 }
 
+DataTypeBuffer.ReadWrite.Vector2 = {
+    write : <T>(writer : BufferWriter, v3 : T) => {
+        const vector2 = v3 as T & Vector2
+        writer.writeFloat32(vector2.X)
+        writer.writeFloat32(vector2.Y)
+    },
+
+    read : (reader : BufferReader) : Vector2 => {
+        const x = reader.readFloat32()
+        const y = reader.readFloat32()
+        return new Vector2(x, y)
+    }
+}
 
 export default DataTypeBuffer

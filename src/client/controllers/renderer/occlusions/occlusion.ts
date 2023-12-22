@@ -1,7 +1,7 @@
 import { Requiem } from "shared/requiem"
-import { OccluderType } from "./occlusions/classes/Occluder"
-import { Cells } from "./occlusions/Camera"
-import { OccludeeType } from "./occlusions/classes/Occludee"
+import { OccluderType } from "./classes/Occluder"
+import { Cells } from "./Camera"
+import { OccludeeType } from "./classes/Occludee"
 
 export class Occlusion {
     private render : RBXScriptConnection
